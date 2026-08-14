@@ -1,0 +1,15 @@
+{
+  "name": "web-search-mcp",
+  "version": "1.0.0",
+  "description": "Локальный MCP-сервер веб-поиска через DuckDuckGo",
+  "main": "build/index.js",
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "node -e \"const fs=require('fs');fs.mkdirSync('build',{recursive:true});fs.copyFileSync('index.js','build/index.js')\"",
+    "postinstall": "npm run build"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

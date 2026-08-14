@@ -1,0 +1,36 @@
+model_list:
+
+  # ===== Claude-алиасы для обратной совместимости =====
+  - model_name: claude-3-5-sonnet-20241022
+    litellm_params:
+      model: openai/moonshotai/kimi-k3
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+
+  - model_name: claude-3-opus-20240229
+    litellm_params:
+      model: openai/deepseek/deepseek-v4-pro
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+
+  - model_name: claude-3-5-haiku-20241022
+    litellm_params:
+      model: openai/deepseek/deepseek-v4-flash
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+
+litellm_settings:
+  drop_params: true
+  pessimistic_cooldown: false
+  cooldown_time: 5
+  success_callbacks: ["anthropic_tpm_rpm_headers"]
+  failure_callbacks: ["anthropic_tpm_rpm_headers"]
+
+general_settings:
+  disable_ui: true
