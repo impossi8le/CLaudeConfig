@@ -70,6 +70,7 @@ call :npm_install "ssh-mcp"
 call :npm_install "mcp-gsheets@latest"
 call :npm_install "@gongrzhe/server-gmail-autoauth-mcp"
 call :npm_install "@playwright/mcp@latest"
+call :npm_install "mcp-remote"
 echo.
 
 :: ------------------------------------------------------------
