@@ -18,10 +18,14 @@ Write-Host ""
 # ------------------------------------------------------------
 $ghToken   = Read-Host "GitHub Personal Access Token (Enter - пропустить)"
 $tavilyKey = Read-Host "Tavily API Key (Enter - пропустить)"
+$n8nUrl    = Read-Host "n8n URL (Enter - http://localhost:5678)"
+$n8nToken  = Read-Host "n8n Bearer токен (Enter - пропустить)"
 $sshHost   = Read-Host "SSH хост (Enter - пропустить)"
 $sshUser   = Read-Host "SSH пользователь (Enter - пропустить)"
 $sshPass   = Read-Host "SSH пароль (Enter - пропустить)" -AsSecureString
 $routerKey = Read-Host "routerai.ru API ключ (Enter - пропустить)"
+
+if ($n8nUrl -eq "") { $n8nUrl = "http://localhost:5678" }
 
 # Конвертируем SecureString обратно в обычную строку
 if ($sshPass -ne $null -and $sshPass.Length -gt 0) {
@@ -85,6 +89,10 @@ $config = @{
         "web-search" = @{
             command = "node"
             args = @("C:/Users/$env:USERNAME/web-search/build/index.js")
+        }
+        "n8n-local" = @{
+            command = "mcp-remote"
+            args = @("$n8nUrl/mcp-server/http", "--allow-http", "--header", "Authorization: Bearer $n8nToken")
         }
         "curl-client" = @{
             command = "npx"
@@ -157,6 +165,7 @@ $config = @{
 # Удаляем пустые ключи, чтобы не ломать серверы
 if ($ghToken -eq "") { $config.mcpServers.Remove("github") }
 if ($tavilyKey -eq "") { $config.mcpServers.Remove("tavily-mcp"); $config.mcpServers.Remove("tavily2-mc") }
+if ($n8nToken -eq "") { $config.mcpServers.Remove("n8n-local") }
 if ($sshHost -eq "") { $config.mcpServers.Remove("alolite-ssh"); $config.mcpServers.Remove("ssh-remote-server") }
 
 # ------------------------------------------------------------
