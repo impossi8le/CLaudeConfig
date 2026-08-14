@@ -1,0 +1,231 @@
+{
+  "mcpServers": {
+    "local-memory": {
+      "command": "node",
+      "args": [
+        "C:/Users/motin/.claude/mcp/memory-proxy.cjs"
+      ],
+      "env": {
+        "MCP_MEMORY_SERVER_CMD": "npx",
+        "MCP_MEMORY_SERVER_ARGS": "-y @modelcontextprotocol/server-memory"
+      }
+    },
+    "mcp_docker": {
+      "command": "C:\\Program Files\\Docker\\cli-plugins\\docker-mcp.exe",
+      "args": [
+        "gateway",
+        "run"
+      ],
+      "env": {
+        "ProgramData": "C:\\ProgramData",
+        "LOCALAPPDATA": "C:\\Users\\motin\\AppData\\Local",
+        "APPDATA": "C:\\Users\\motin\\AppData\\Roaming",
+        "USERPROFILE": "C:\\Users\\motin",
+        "SystemRoot": "C:\\Windows"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "anthropic-global-skills": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/motin/.claude/skills"
+      ]
+    },
+    "github": {
+      "command": "C:/Users/motin/AppData/Local/github/github-mcp-server.exe",
+      "args": [
+        "stdio"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "key"
+      }
+    },
+    "fetch": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_server_fetch"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--browser-url=http://localhost:9223"
+      ]
+    },
+    "web-search": {
+      "command": "node",
+      "args": [
+        "C:/Users/motin/web-search/build/index.js"
+      ]
+    },
+    "n8n-local": {
+      "command": "mcp-remote",
+      "args": [
+        "http://YOUR_N8N_HOST:5678/mcp-server/http",
+        "--allow-http",
+        "--header",
+        "Authorization: Bearer YOUR_N8N_TOKEN"
+      ]
+    },
+    "curl-client": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@calibress/curl-mcp"
+      ]
+    },
+    "alolite-ssh": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@alolite/ssh-mcp"
+      ],
+      "env": {
+        "SSH_HOST": "ip",
+        "SSH_USER": "user",
+        "SSH_PASSWORD": "password",
+        "PROGRAMDATA": "C:\\ProgramData"
+      }
+    },
+    "tavily-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tavily-mcp@latest"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "key"
+      }
+    },    
+    "tavily2-mc": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tavily-mcp@latest"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "key"
+      }
+    },
+    "ssh-remote-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--host=ip",
+        "--user=user",
+        "--password=password"
+      ]
+    },
+    "google-sheets": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-gsheets@latest"
+      ],
+      "env": {
+        "GOOGLE_PROJECT_ID": "YOUR_GOOGLE_PROJECT_ID",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:/Users/motin/google-sheets-key.json"
+      }
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "gmail-global": {
+      "command": "npx",
+      "args": [
+        "@gongrzhe/server-gmail-autoauth-mcp"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  },
+  "deploymentMode": "3p",
+  "coworkUserFilesPath": "C:\\Users\\motin\\Claude",
+  "preferences": {
+    "launchPreviewPersistedWorkspaces": [],
+    "launchPreviewSessionScopedSessions": [],
+    "localAgentModeTrustedFolders": [
+
+    ],
+    "coworkScheduledTasksEnabled": true,
+    "coworkHipaaRestricted": false,
+    "ccdScheduledTasksEnabled": false,
+    "sidebarMode": "epitaxy",
+    "bypassPermissionsOptInByAccount": {
+      "195e5ca1-f469-479c-b068-afb3f71bd503": true
+    },
+    "bypassPermissionsGateByAccount": {
+      "195e5ca1-f469-479c-b068-afb3f71bd503": true
+    },
+    "coworkWebSearchEnabled": true,
+    "coworkModelAutoFallbackByAccount": {
+      "195e5ca1-f469-479c-b068-afb3f71bd503": true
+    },
+    "remoteToolsDeviceName": "desktop-gn7g2fk",
+    "epitaxyPrefs": {
+      "ccd-sessions-filter": {
+        "state": {
+          "selectedProjects": []
+        },
+        "version": 0
+      },
+      "starred-local-code-sessions": [],
+      "starred-cowork-spaces": [],
+      "starred-session-groups": [],
+      "dframe-local-slice": {
+        "pinnedOrder": [],
+        "homeProjectsPinnedOrder": []
+      },
+      "desktop-frame.paneStore.v1": {
+        "state": {
+          "extraPanesByMode": {},
+          "colWeightsByMode": {},
+          "rowSplit": 0.5,
+          "draftNonce": 0
+        },
+        "version": 4
+      },
+      "epitaxy-perm-mode-acks.195e5ca1-f469-479c-b068-afb3f71bd503": [
+
+      ],
+      "epitaxy-folder-permission-mode.195e5ca1-f469-479c-b068-afb3f71bd503": {
+
+      },
+      "cc-landing-worktree-enabled": false,
+      "claude-code-preferred-editor": "vscode",
+      "dframe-group-scopes": {},
+      "code-sessions-selected-environments": [],
+      "code-projects-order.195e5ca1-f469-479c-b068-afb3f71bd503": [
+
+      ]
+    }
+  }
+}
