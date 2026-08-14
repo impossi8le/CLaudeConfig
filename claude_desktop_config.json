@@ -79,10 +79,10 @@
     "n8n-local": {
       "command": "mcp-remote",
       "args": [
-        "http://YOUR_N8N_HOST:5678/mcp-server/http",
+        "http://ip:5678/mcp-server/http",
         "--allow-http",
         "--header",
-        "Authorization: Bearer YOUR_N8N_TOKEN"
+        "Authorization: Bearer key"
       ]
     },
     "curl-client": {
