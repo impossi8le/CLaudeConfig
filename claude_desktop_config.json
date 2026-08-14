@@ -3,7 +3,7 @@
     "local-memory": {
       "command": "node",
       "args": [
-        "C:/Users/motin/.claude/mcp/memory-proxy.cjs"
+        "C:/Users/YOUR_USERNAME/.claude/mcp/memory-proxy.cjs"
       ],
       "env": {
         "MCP_MEMORY_SERVER_CMD": "npx",
@@ -18,9 +18,9 @@
       ],
       "env": {
         "ProgramData": "C:\\ProgramData",
-        "LOCALAPPDATA": "C:\\Users\\motin\\AppData\\Local",
-        "APPDATA": "C:\\Users\\motin\\AppData\\Roaming",
-        "USERPROFILE": "C:\\Users\\motin",
+        "LOCALAPPDATA": "C:\\Users\\YOUR_USERNAME\\AppData\\Local",
+        "APPDATA": "C:\\Users\\YOUR_USERNAME\\AppData\\Roaming",
+        "USERPROFILE": "C:\\Users\\YOUR_USERNAME",
         "SystemRoot": "C:\\Windows"
       }
     },
@@ -43,16 +43,16 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "C:/Users/motin/.claude/skills"
+        "C:/Users/YOUR_USERNAME/.claude/skills"
       ]
     },
     "github": {
-      "command": "C:/Users/motin/AppData/Local/github/github-mcp-server.exe",
+      "command": "C:/Users/YOUR_USERNAME/AppData/Local/github/github-mcp-server.exe",
       "args": [
         "stdio"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "key"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT"
       }
     },
     "fetch": {
@@ -73,16 +73,16 @@
     "web-search": {
       "command": "node",
       "args": [
-        "C:/Users/motin/web-search/build/index.js"
+        "C:/Users/YOUR_USERNAME/web-search/build/index.js"
       ]
     },
     "n8n-local": {
       "command": "mcp-remote",
       "args": [
-        "http://ip:5678/mcp-server/http",
+        "http://YOUR_N8N_HOST:5678/mcp-server/http",
         "--allow-http",
         "--header",
-        "Authorization: Bearer key"
+        "Authorization: Bearer YOUR_N8N_TOKEN"
       ]
     },
     "curl-client": {
@@ -99,9 +99,9 @@
         "@alolite/ssh-mcp"
       ],
       "env": {
-        "SSH_HOST": "ip",
-        "SSH_USER": "user",
-        "SSH_PASSWORD": "password",
+        "SSH_HOST": "YOUR_SSH_HOST",
+        "SSH_USER": "YOUR_SSH_USER",
+        "SSH_PASSWORD": "YOUR_SSH_PASSWORD",
         "PROGRAMDATA": "C:\\ProgramData"
       }
     },
@@ -112,9 +112,9 @@
         "tavily-mcp@latest"
       ],
       "env": {
-        "TAVILY_API_KEY": "key"
+        "TAVILY_API_KEY": "YOUR_TAVILY_API_KEY"
       }
-    },    
+    },
     "tavily2-mc": {
       "command": "npx",
       "args": [
@@ -122,7 +122,7 @@
         "tavily-mcp@latest"
       ],
       "env": {
-        "TAVILY_API_KEY": "key"
+        "TAVILY_API_KEY": "YOUR_TAVILY_API_KEY"
       }
     },
     "ssh-remote-server": {
@@ -130,9 +130,9 @@
       "args": [
         "-y",
         "ssh-mcp",
-        "--host=ip",
-        "--user=user",
-        "--password=password"
+        "--host=YOUR_SSH_HOST",
+        "--user=YOUR_SSH_USER",
+        "--password=YOUR_SSH_PASSWORD"
       ]
     },
     "google-sheets": {
@@ -143,7 +143,7 @@
       ],
       "env": {
         "GOOGLE_PROJECT_ID": "YOUR_GOOGLE_PROJECT_ID",
-        "GOOGLE_APPLICATION_CREDENTIALS": "C:/Users/motin/google-sheets-key.json"
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:/Users/YOUR_USERNAME/google-sheets-key.json"
       }
     },
     "puppeteer": {
@@ -168,28 +168,20 @@
     }
   },
   "deploymentMode": "3p",
-  "coworkUserFilesPath": "C:\\Users\\motin\\Claude",
+  "coworkUserFilesPath": "C:\\Users\\YOUR_USERNAME\\Claude",
   "preferences": {
     "launchPreviewPersistedWorkspaces": [],
     "launchPreviewSessionScopedSessions": [],
-    "localAgentModeTrustedFolders": [
-
-    ],
+    "localAgentModeTrustedFolders": [],
     "coworkScheduledTasksEnabled": true,
     "coworkHipaaRestricted": false,
     "ccdScheduledTasksEnabled": false,
     "sidebarMode": "epitaxy",
-    "bypassPermissionsOptInByAccount": {
-      "195e5ca1-f469-479c-b068-afb3f71bd503": true
-    },
-    "bypassPermissionsGateByAccount": {
-      "195e5ca1-f469-479c-b068-afb3f71bd503": true
-    },
+    "bypassPermissionsOptInByAccount": {},
+    "bypassPermissionsGateByAccount": {},
     "coworkWebSearchEnabled": true,
-    "coworkModelAutoFallbackByAccount": {
-      "195e5ca1-f469-479c-b068-afb3f71bd503": true
-    },
-    "remoteToolsDeviceName": "desktop-gn7g2fk",
+    "coworkModelAutoFallbackByAccount": {},
+    "remoteToolsDeviceName": "YOUR_DEVICE_NAME",
     "epitaxyPrefs": {
       "ccd-sessions-filter": {
         "state": {
@@ -213,19 +205,13 @@
         },
         "version": 4
       },
-      "epitaxy-perm-mode-acks.195e5ca1-f469-479c-b068-afb3f71bd503": [
-
-      ],
-      "epitaxy-folder-permission-mode.195e5ca1-f469-479c-b068-afb3f71bd503": {
-
-      },
+      "epitaxy-perm-mode-acks": [],
+      "epitaxy-folder-permission-mode": {},
       "cc-landing-worktree-enabled": false,
       "claude-code-preferred-editor": "vscode",
       "dframe-group-scopes": {},
       "code-sessions-selected-environments": [],
-      "code-projects-order.195e5ca1-f469-479c-b068-afb3f71bd503": [
-
-      ]
+      "code-projects-order": []
     }
   }
 }
