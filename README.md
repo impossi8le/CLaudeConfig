@@ -1,6 +1,6 @@
 # Claude Desktop — конфигурация и установка MCP-серверов
 
-Готовая конфигурация для **Claude Desktop (Cowork / 3p)** с набором из **18 MCP-серверов**, а также конфиг **LiteLLM** для проксирования моделей через `routerai.ru`.
+Готовая конфигурация для **Claude Desktop (Cowork / 3p)** с набором из **19 MCP-серверов**, а также конфиг **LiteLLM** для проксирования моделей через `routerai.ru`.
 
 ---
 
@@ -68,6 +68,7 @@ powershell -ExecutionPolicy Bypass -File setup-config.ps1
 | `fetch` | Получение веб-страниц | Python `mcp-server-fetch` |
 | `chrome-devtools` | Управление Chrome (DevTools) | Chrome с портом `9223` |
 | `web-search` | Локальный веб-поиск | локальный Node-сервер |
+| `n8n-local` | Автоматизация n8n | URL + Bearer-токен n8n |
 | `curl-client` | HTTP-запросы | — |
 | `alolite-ssh` | SSH по MCP | SSH-хост/логин/пароль |
 | `tavily-mcp` | Поиск через Tavily | `TAVILY_API_KEY` |
@@ -97,6 +98,7 @@ npm install -g ssh-mcp
 npm install -g mcp-gsheets@latest
 npm install -g @gongrzhe/server-gmail-autoauth-mcp
 npm install -g @playwright/mcp@latest
+npm install -g mcp-remote
 ```
 
 ### 2. Python-пакеты
@@ -134,6 +136,7 @@ npm install
 |---|---|
 | **GitHub PAT** | GitHub → Settings → Developer settings → Personal access tokens (права: `repo`, `read:org`) |
 | **Tavily API Key** | https://app.tavily.com → API Keys |
+| **n8n токен** | Ваш n8n-инстанс → Settings → MCP Server → скопировать Bearer-токен и URL |
 | **Google Service Account** | Google Cloud Console → IAM → Service Accounts → Create Key (JSON) |
 
 ---
