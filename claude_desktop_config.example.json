@@ -76,6 +76,15 @@
         "C:/Users/YOUR_USERNAME/web-search/build/index.js"
       ]
     },
+    "n8n-local": {
+      "command": "mcp-remote",
+      "args": [
+        "http://YOUR_N8N_HOST:5678/mcp-server/http",
+        "--allow-http",
+        "--header",
+        "Authorization: Bearer YOUR_N8N_TOKEN"
+      ]
+    },
     "curl-client": {
       "command": "npx",
       "args": [
@@ -172,7 +181,7 @@
     "bypassPermissionsGateByAccount": {},
     "coworkWebSearchEnabled": true,
     "coworkModelAutoFallbackByAccount": {},
-    "remoteToolsDeviceName": "desktop",
+    "remoteToolsDeviceName": "YOUR_DEVICE_NAME",
     "epitaxyPrefs": {
       "ccd-sessions-filter": {
         "state": {
