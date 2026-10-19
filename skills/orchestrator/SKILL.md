@@ -1,78 +1,89 @@
 ---
 name: orchestrator
-description: Multi-agent orchestration for this environment — runs the 6-role pipeline (analyst → architect → approver → developer → devops → qa) with auto-retry on gates, human-in-the-loop control, and shared memory. Use when the user wants to delegate work to a team of roles, run a build pipeline, review/approve requirements, or when multiple specialized agents should cooperate on one task. Covers the DSH orchestrator (dsh-agent-teams), the Claude Code subagents + /orchestrate, and the Claude Desktop orchestrator-mcp (8 tools).
+description: Use when the user asks to run a multi-agent workflow, delegate analysis and implementation across roles, use the local orchestrator MCP, or coordinate approvals and verification across Claude Code, Claude Desktop, and DSH.
 ---
 
 # Orchestrator
 
-Это окружение умеет запускать многоагентный конвейер из 6 ролей. Три реализации — выбирай по контексту.
+Choose the orchestration implementation from the current session context. Do not conflate the text-only Desktop MCP with Claude Code's tool-enabled agents or DSH's agent teams.
 
-## Роли (одинаковые везде)
+## Implementations
 
-| Роль | Что делает | Модель |
+| Environment | Mechanism | Actual capability |
 |---|---|---|
-| **analyst** | Требования: User Stories, Use Cases, функциональные/нефункциональные, критерии приёмки | deepseek-v4-pro |
-| **architect** | Архитектура: компоненты, БД, стек, API-контракты, критика требований | deepseek-v4-pro |
-| **approver** | Гейт качества: APPROVED / REJECTED (+причины) | deepseek-chat |
-| **developer** | Пишет код по ТЗ, файлы, тесты | deepseek-v4-pro |
-| **devops** | Сборка, Docker, окружение, запуск тестов | deepseek-chat |
-| **qa** | Автотесты: PASSED / FAILED (+логи) | deepseek-chat |
+| Claude Code | Native agents / `Agent` tool | Can inspect or change the current repository according to the tools granted to each agent. |
+| Claude Desktop | Local `orchestrator-mcp` | Runs RouterAI text completions, persists role outputs and gates, but has no repository filesystem or terminal execution. Claude Code must perform edits and run checks. |
+| DeepSeek Harness (DSH) | `agent_teams_*` | DSH-owned agent-team task management; follow its live tool contract. |
 
-Конвейер: `analyst → architect → approver → developer → devops → qa`.
-Гейты: **approver** (REJECTED возвращает к analyst), **qa** (FAILED возвращает к developer).
+For Claude Desktop MCP work, use the detailed protocol below. Do not describe a model response as a file edit, build, or test run.
 
-⚠️ **Модели:** никогда не используй `deepseek-v4-flash` через RouterAI — отдаёт пустой content. Тяжёлые роли = `deepseek-v4-pro`, рутина = `deepseek/deepseek-chat`.
+## Claude Desktop: `orchestrator-mcp`
 
-## 1. Claude Code — субагенты + /orchestrate (этот терминал)
+### Roles and model defaults
 
-Субагенты: `~/.claude/agents/{analyst,architect,approver,developer,devops,qa}.md`.
-Команда: `/orchestrate` — запускает конвейер по цепочке через Task tool (Agent tool, subagent_type).
+| Role | Purpose | Default model |
+|---|---|---|
+| `analyst` | Requirements, acceptance criteria, constraints | `openai/openai/gpt-6-luna` |
+| `architect` | Architecture, interfaces, data model and risks | `openai/openai/gpt-6-luna` |
+| `approver` | Explicit `APPROVED` / `REJECTED` requirements gate | `openai/deepseek/deepseek-v4.1-flash` |
+| `developer` | Produces an implementation handoff for Claude Code | `openai/openai/gpt-6-luna` |
+| `devops` | Advises on build and test commands; does not run them | `openai/deepseek/deepseek-v4.1-flash` |
+| `qa` | Reviews submitted check evidence; does not run tests | `openai/deepseek/deepseek-v4.1-flash` |
 
-Запуск: делегируй через Agent tool, передавая результат предыдущей роли в prompt следующей.
-- Если approver вернул REJECTED — вернись к analyst с причинами.
-- Если qa вернул FAILED — вернись к developer с логами.
-- Повторяй, пока гейты не пройдут (авто-цикл от тебя, не от пользователя).
+The MCP accepts `ORCH_PRO_MODEL` and `ORCH_FLASH_MODEL` overrides. Its requested default IDs are forwarded to RouterAI unchanged. If a model is rejected, report the provider error; do not silently substitute an ID. Availability was not verified with a paid live request.
 
-## 2. Claude Desktop — orchestrator-mcp (MCP-сервер)
+Auto mode is a length/keyword heuristic, not semantic task understanding: it selects `simple` when the task is at most 90 characters and contains none of its hard-coded multi-scope terms; otherwise it selects `full`. A short broad task can therefore select simple, while a long narrow task can select full. Set `mode` explicitly when that heuristic does not match the task. Explicit nonempty `roles` replace the mode’s default sequence; do not omit analyst/approver unless the user specifically requests a reduced workflow.
 
-Сервер: `C:/Users/motin/orchestrator-mcp/index.js`, 8 инструментов. Вызывает DeepSeek (RouterAI) напрямую.
+### Modes and default sequences
 
-**Протокол цикла (Claude Desktop владеет циклом):**
-1. `orchestrate_start` {task, roles?, cwd?, autoRetry?, maxRetries?} → вернёт `run_id`
-2. `orchestrate_status` {run_id} — смотреть прогресс (✅/▶️/⏸), есть ли гейт
-3. `orchestrate_next` {run_id} — продвинуть конвейер
-4. На гейте: `orchestrate_resolve` {run_id, action}:
-   - `retry` {target, feedback} — вернуть роль на доработку с замечаниями
-   - `skip` — пропустить гейт
-   - `stop` — остановить запуск
-5. `orchestrate_result` {run_id, role} — прочитать текст этапа
+`orchestrate_start` accepts `mode: "auto" | "simple" | "full"` (default `auto`) and optional explicit `roles`.
 
-**Полное погружение (human-in-the-loop):**
-- `orchestrate_interject` {run_id, role?, message} — вмешаться: указание роли (роль перезапустится с ним)
-- `orchestrate_edit` {run_id, role, text} — править результат этапа вручную
-- `orchestrate_add_role` {run_id, role, index?} — вставить роль (напр. security-review)
+- `auto` selects `simple` for a short, narrowly scoped request; otherwise it selects `full`.
+- `simple`: `analyst → approver → developer → qa`. Skips architecture and runs analysis/approval preparation without an extra `orchestrate_next` call.
+- `full`: `analyst + architect` run in parallel from the original task, then `approver → developer → devops → qa`. The current built-in default role list omits `devops`, however; normal `full` mode is therefore `analyst + architect → approver → developer → qa`. Even if manually included, DevOps is an advisory text role and is not an executable build step; standard advancement pauses after developer handoff.
 
-**Автоповтор:** `autoRetry` (по умолчанию true) — REJECTED/FAILED сам возвращается на target с фидбеком до `maxRetries` (по умолчанию 2). Transient API-ошибки тоже ретраятся. Когда попытки исчерпаны — waiting-gate, решение за человеком/Claude.
+Both default workflows stop at the explicit approval gate. On approval, `orchestrate_next` runs the developer handoff and stops at `waiting-execution`. The MCP has not edited files at this point.
 
-**Ошибка на гейте — что делать Claude:** не паникуй. Прочитай `detail`, выбери retry/skip/stop и вызови `orchestrate_resolve`. Retry обычно правильный выбор, если причины устранимы.
+### Correct end-to-end protocol
 
-## 3. DSH — dsh-agent-teams
+1. Start a workflow, choosing the scope/mode deliberately:
+   `orchestrate_start({ task, mode: "auto" })`.
+2. Read the returned `run_id` and approval result. Preparation runs automatically until a gate. Use `orchestrate_status({ run_id })` and `orchestrate_result({ run_id, role })` when details are needed; do not advance through each prep role manually.
+3. If approval is `REJECTED`, inspect the reasons and call `orchestrate_resolve({ run_id, action: "retry", target: "analyst", feedback })`, or stop. Do not skip an approval gate unless the user explicitly authorizes it.
+4. When approval is `APPROVED`, call `orchestrate_next({ run_id })` to get the implementation handoff. Then Claude Code—not the MCP role—must inspect the repository, implement the change, review the diff, and run the appropriate real checks.
+5. If a check fails, fix the implementation and rerun the checks. Submit the fresh results with `orchestrate_submit_qa({ run_id, checks })`, where each check contains `name`, `command`, integer `exitCode`, and concise `output`.
+6. The MCP rejects missing/malformed evidence and does not ask the QA model to pass failed checks. For all-zero exit codes it asks QA to assess the evidence; only an explicit `VERDICT: PASSED` completes the run. Ambiguous QA text remains a failure/pending execution, not success.
+7. If QA review rejects evidence, use `orchestrate_resolve({ run_id, action: "retry", feedback })`. The old evidence is cleared and a new developer handoff is produced. Claude Code must implement/review/run checks again before resubmitting fresh evidence.
 
-Капитан-сессия в DeepSeek Harness (web, порт 3080). Инструменты `agent_teams_*`:
-create, add_member, remove_member, create_task, reassign_task, claim_task, update_task, send_message, status, delete.
-Состояние в `/.agent-teams/`, до 8 членов, memberModel deepseek-v4.
-Управление — естественным языком: «Use AgentTeams: собери команду, разбей на задачи...».
+Evidence is supplied by Claude Code and is not independently authenticated by the MCP. Submit only commands actually run and their observed exit codes/output. Never claim `PASSED` based only on QA prose, a proposed command, or a developer handoff.
 
-## Память
+### MCP tools
 
-- Claude Desktop knowledge graph (local-memory): сущность `DSH_Orchestrator`, роли `*_role`, `RouterAI`.
-- Оркестратор: `~/.dsh-orchestrator-memory.jsonl` — роли получают контекст из прошлых запусков.
-- При работе — пиши ключевые факты в память (create_entities/add_observations), чтобы следующая сессия знала.
+- `orchestrate_start({ task, mode?, roles?, cwd?, autoRetry?, maxRetries? })` — create a persisted run; auto-advance preparation to a gate.
+- `orchestrate_status({ run_id })` — inspect state.
+- `orchestrate_next({ run_id })` — pass an approved gate and receive the developer handoff; normally blocked while waiting for Claude Code execution/evidence. After a failed QA review, prefer `orchestrate_resolve(action: "retry")` to force a new handoff and clear old evidence before resubmitting.
+- `orchestrate_submit_qa({ run_id, checks })` — submit the actual local verification results for QA review.
+- `orchestrate_resolve({ run_id, action, target?, feedback? })` — retry/skip/stop a waiting gate. Preserve human approval; skip only with explicit authorization.
+- `orchestrate_result({ run_id, role })` — read one saved role result.
+- `orchestrate_interject({ run_id, role?, message })` — save guidance and rewind that role when its result is already produced.
+- `orchestrate_edit({ run_id, role, text })` — replace a stored role result.
+- `orchestrate_add_role({ run_id, role, index? })` — insert a supported role in a run.
 
-## Применение
+Run mutation is serialized per run in this MCP process; a busy-run error means retry after the in-flight call finishes. Runs persist under the server's `runs/` directory. Memory is best-effort contextual material, not an authority over current project state.
 
-Когда пользователь говорит «сделай X командой», «запусти оркестратор», «собери аналитика/архитектора/разработчика»:
-1. Пойми, какая реализация доступна (Claude Code здесь, Desktop MCP, DSH).
-2. Запусти конвейер (или первый этап), покажи план.
-3. Контролируй цикл: смотри статусы, решай на гейтах, вмешивайся при необходимости.
-4. Собери итоговый отчёт по ролям.
+## Claude Code agents
+
+Use the available native `Agent` tool/subagent types and their granted tools. A Claude Code developer agent may edit files only if its tool permissions allow it; run tests through actual terminal/tool access. Preserve explicit review and verification even when the agent can execute changes.
+
+## DSH agent teams
+
+Use `agent_teams_*` tools only when the session is actually connected to DeepSeek Harness. Follow the live schema/status reported by those tools rather than assuming it matches `orchestrator-mcp`.
+
+## Common mistakes
+
+- Saying the Desktop MCP developer role implemented code: it only returned text.
+- Saying DevOps built the project or QA ran tests: both are text-only roles.
+- Treating an approval as proof that implementation or tests passed.
+- Treating arbitrary QA prose as a passing verdict.
+- Passing proposed commands or fabricated output as verification evidence.
+- Assuming every implementation has the same role order, concurrency, gates, or model IDs.

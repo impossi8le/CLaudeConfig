@@ -1,6 +1,6 @@
 ---
 name: docs-orchestration
-description: Сводный навык — запускает оркестратор (6 ролей) и оформляет результат в документ (docx/pptx/xlsx/pdf). Используй, когда нужно «собери команду и сделай отчёт/ТЗ/презентацию», когда результат работы агентов должен стать файлом документа.
+description: Use when the user wants multi-agent analysis or implementation findings assembled into a Word, PowerPoint, Excel, or PDF deliverable.
 ---
 
 # Docs Orchestration
@@ -14,20 +14,19 @@ description: Сводный навык — запускает оркестрат
 
 ### Шаг 1. Запусти оркестратор
 Выбери реализацию по контексту (см. навык `orchestrator`):
-- **Claude Desktop**: `orchestrate_start {task, roles?, autoRetry?}` → затем `status`/`next`/`resolve` до результата.
-- **Claude Code**: субагенты или `/orchestrate`.
+- **Claude Desktop MCP**: `orchestrate_start({task, mode?})` автоматически проходит подготовку до approval; после `APPROVED` вызови `orchestrate_next` для developer handoff.
+- **Claude Code**: native subagents/Agent tool с доступными репо-инструментами.
 - **DSH**: `agent_teams_*`.
 
-Роли по умолчанию: analyst → architect → approver → developer → devops → qa.
-Управляй гейтами: REJECTED → retry к analyst; FAILED → retry к developer. Автоповтор включён.
+Desktop MCP — только RouterAI text workflow. После handoff Claude Code сам меняет файлы и запускает проверки; затем передай реальные результаты через `orchestrate_submit_qa({run_id, checks})`. Не описывай proposal от developer как сделанную работу, и не называй QA успешным без фактических exit code и явного `VERDICT: PASSED`.
 
 ### Шаг 2. Собери итог
-Из результатов ролей сформируй структурированное содержимое:
+Сформируй структурированное содержание и отделяй результаты моделей от фактической работы:
 - **analyst** → требования
-- **architect** → архитектура
-- **developer** → что реализовано
-- **qa** → статус тестов
-- Плюс ключевые решения и метрики.
+- **architect** → архитектура (в full-режиме; параллельно аналитику)
+- **developer** → implementation handoff; что реально изменено указывает Claude Code по diff
+- **devops** → рекомендации команд; не свидетельство их запуска
+- **qa** → оценка переданных фактических проверок; включай команды/exit code и только явный `VERDICT: PASSED`
 
 ### Шаг 3. Оформи в документ
 По формату (используй соответствующий навык):

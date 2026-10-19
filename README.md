@@ -1,21 +1,25 @@
-# Claude Desktop — конфигурация и установка MCP-серверов
+# CLaudeConfig
 
-Готовая конфигурация для **Claude Desktop (Cowork / 3p)** с набором из **19 MCP-серверов**, а также конфиг **LiteLLM** для проксирования моделей через `routerai.ru`.
+Готовая конфигурация для **Claude Desktop (Cowork / 3p)**: **14 MCP-серверов**, **42 скилла**, локальные прокси и конфиг **LiteLLM** для проксирования моделей через `routerai.ru`.
+
+Перенос на другой компьютер — см. **[INSTALL-NEW-PC.md](INSTALL-NEW-PC.md)**.
 
 ---
 
-## 📁 Структура репозитория
+## 📁 Структура
 
-| Файл | Что это |
+| Файл / папка | Что это |
 |---|---|
-| `claude_desktop_config.json` | Готовый конфиг Claude Desktop (**вставьте свои ключи!**) |
-| `claude_desktop_config.example.json` | Шаблон конфига с плейсхолдерами `YOUR_*` |
-| `install.bat` | Автоустановщик: проверка окружения + установка всех npm/pip пакетов |
-| `setup-config.ps1` | Генератор конфига: спросит ключи и сам создаст `claude_desktop_config.json` |
-| `memory-proxy.cjs` | Прокси-обёртка для MCP Memory-сервера (ставится в `~/.claude/mcp/`) |
+| `claude_desktop_config.json` | Конфиг Claude Desktop с плейсхолдерами `YOUR_*` |
+| `claude_desktop_config.example.json` | То же (шаблон) |
+| `setup-config.ps1` | Спросит ключи и создаст реальный конфиг в `%APPDATA%\Claude\` |
+| `install.bat` | Автоустановщик: проверка окружения + npm/pip пакеты |
+| `memory-proxy.cjs` | Прокси для MCP Memory (срезает `$schema` draft-07) |
+| `n8n-mcp-fix-proxy.mjs` | Прокси для n8n MCP (чинит draft-07 схему, n8n#36361) |
+| `orchestrator-mcp/` | MCP-сервер оркестратора: 6 ролей через RouterAI |
+| `skills/` | 42 скилла |
 | `ClaudeConfigLiteLLM.yaml` | Конфиг LiteLLM для проксирования Claude-моделей |
-| `ClaudeConfigLiteLLM.example.yaml` | То же, но с плейсхолдерами |
-| `web-search/` | Локальный MCP-сервер веб-поиска (Node.js, DuckDuckGo) |
+| `INSTALL-NEW-PC.md` | Пошаговая инструкция переноса на другую машину |
 
 ---
 
@@ -23,19 +27,17 @@
 
 | Компонент | Зачем | Где взять |
 |---|---|---|
-| **Windows 10/11** | ОС | — |
-| **Node.js 18+** (с npm) | большинство MCP-серверов | https://nodejs.org |
-| **Python 3.9+** | `fetch`, LiteLLM | https://python.org (галочка **Add to PATH**) |
-| **Docker Desktop** | MCP-сервер `mcp_docker` (опционально) | https://www.docker.com/products/docker-desktop/ |
-| **Google Chrome** | `chrome-devtools`, `playwright` | https://www.google.com/chrome/ |
-| **GitHub Desktop / GitHub MCP** | MCP-сервер `github` | https://desktop.github.com |
-
-> ⚠️ **GitHub MCP-сервер** — если `github-mcp-server.exe` не появился после установки GitHub Desktop, скачайте его отдельно:
-> `winget install GitHub.cli` или возьмите бинарник из https://github.com/github/github-mcp-server/releases и положите в `%LOCALAPPDATA%\github\github-mcp-server.exe`.
+| Windows 10/11 | ОС | — |
+| **Node.js 18+** | MCP-серверы | https://nodejs.org |
+| **Python 3.9+** | LiteLLM | https://python.org |
+| **Git** | клонирование | https://git-scm.com |
+| **Docker Desktop** | `mcp_docker` | https://www.docker.com/products/docker-desktop/ |
+| **Rust + cargo** | `lean-ctx` | https://rustup.rs |
+| **github-mcp-server.exe** | `github` | https://github.com/github/github-mcp-server/releases |
 
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Установка
 
 ```bat
 git clone https://github.com/impossi8le/CLaudeConfig.git
@@ -49,117 +51,53 @@ install.bat
 powershell -ExecutionPolicy Bypass -File setup-config.ps1
 ```
 
-Скрипт по очереди спросит **ключи и токены** и создаст готовый `claude_desktop_config.json` в папке `%APPDATA%\Claude\`.
-
-Перезапустите Claude Desktop — все MCP-серверы подхватятся.
+Перезапустите Claude Desktop — MCP-серверы подхватятся.
 
 ---
 
-## 🧩 Список MCP-серверов
+## 🧩 MCP-серверы (14)
 
 | MCP | Что делает | Требует |
 |---|---|---|
 | `local-memory` | Долговременная память (knowledge graph) | `memory-proxy.cjs` |
-| `mcp_docker` | Управление Docker через MCP | Docker Desktop |
+| `mcp_docker` | Управление Docker | Docker Desktop |
 | `filesystem` | Доступ к файлам | — |
 | `sequential-thinking` | Цепочки рассуждений | — |
-| `anthropic-global-skills` | Папка `~/.claude/skills` | — |
-| `github` | Работа с GitHub (PR, issues, код) | `GITHUB_PERSONAL_ACCESS_TOKEN` |
-| `fetch` | Получение веб-страниц | Python `mcp-server-fetch` |
-| `chrome-devtools` | Управление Chrome (DevTools) | Chrome с портом `9223` |
-| `web-search` | Локальный веб-поиск | локальный Node-сервер |
-| `n8n-local` | Автоматизация n8n | URL + Bearer-токен n8n |
+| `github` | GitHub: PR, issues, код | `GITHUB_PERSONAL_ACCESS_TOKEN` |
+| `n8n-local` | Автоматизация n8n | URL + Bearer-токен + `n8n-mcp-fix-proxy.mjs` |
 | `curl-client` | HTTP-запросы | — |
-| `alolite-ssh` | SSH по MCP | SSH-хост/логин/пароль |
+| `alolite-ssh` | SSH по MCP | SSH-хост / логин / пароль |
 | `tavily-mcp` | Поиск через Tavily | `TAVILY_API_KEY` |
-| `tavily2-mc` | Дубликат Tavily | `TAVILY_API_KEY` |
-| `ssh-remote-server` | Ещё один SSH-клиент | SSH-хост/логин/пароль |
-| `google-sheets` | Работа с Google Таблицами | Service Account JSON |
-| `puppeteer` | Браузерная автоматизация | — |
-| `gmail-global` | Gmail по MCP | OAuth-настройка |
-| `playwright` | Браузерная автоматизация (Playwright) | — |
+| `tavily2-mc` | Второй инстанс Tavily | `TAVILY_API_KEY` |
+| `playwright` | Браузерная автоматизация | — |
+| `orchestrator-mcp` | Мультиагентный конвейер (6 ролей) | `ROUTERAI_API_KEY` |
+| `context7` | Актуальная документация библиотек | — |
+| `lean-ctx` | Экономия контекста | Rust-бинарь `lean-ctx` |
 
 ---
 
-## 🔧 Установка вручную (если не хотите `install.bat`)
+## 🎯 Скиллы (42)
 
-### 1. npm-пакеты (все MCP-серверы)
+Папка `skills/`. Установка:
 
-```bat
-npm install -g @modelcontextprotocol/server-memory
-npm install -g @modelcontextprotocol/server-filesystem
-npm install -g @modelcontextprotocol/server-sequential-thinking
-npm install -g @modelcontextprotocol/server-puppeteer
-npm install -g chrome-devtools-mcp@latest
-npm install -g @calibress/curl-mcp
-npm install -g @alolite/ssh-mcp
-npm install -g tavily-mcp@latest
-npm install -g ssh-mcp
-npm install -g mcp-gsheets@latest
-npm install -g @gongrzhe/server-gmail-autoauth-mcp
-npm install -g @playwright/mcp@latest
-npm install -g mcp-remote
+```bash
+xcopy /E /I /Y skills "%USERPROFILE%\.claude\skills"
 ```
 
-### 2. Python-пакеты
+Ключевые: `orchestrator`, `docs-orchestration`, `graphify`, набор `tavily-*`, `brainstorming`, `systematic-debugging`, `test-driven-development`, `writing-plans`, `mcp-builder`, `skill-creator`.
 
-```bat
-pip install mcp-server-fetch
+---
+
+## 🖥️ LiteLLM
+
+Подменяет модели Claude через прокси `routerai.ru`.
+
+```bash
 pip install "litellm[proxy]"
-```
-
-> На Linux/системном Python может понадобиться флаг `--break-system-packages`.
-
-### 3. Папки и файлы
-
-```bat
-mkdir "%USERPROFILE%\.claude\mcp"
-mkdir "%USERPROFILE%\.claude\skills"
-copy /Y memory-proxy.cjs "%USERPROFILE%\.claude\mcp\memory-proxy.cjs"
-```
-
-### 4. Локальный web-search
-
-```bat
-mkdir "%USERPROFILE%\web-search"
-copy /Y web-search\index.js "%USERPROFILE%\web-search\index.js"
-copy /Y web-search\package.json "%USERPROFILE%\web-search\package.json"
-cd "%USERPROFILE%\web-search"
-npm install
-```
-
----
-
-## 🔑 Где взять ключи
-
-| Ключ | Где взять |
-|---|---|
-| **GitHub PAT** | GitHub → Settings → Developer settings → Personal access tokens (права: `repo`, `read:org`) |
-| **Tavily API Key** | https://app.tavily.com → API Keys |
-| **n8n токен** | Ваш n8n-инстанс → Settings → MCP Server → скопировать Bearer-токен и URL |
-| **Google Service Account** | Google Cloud Console → IAM → Service Accounts → Create Key (JSON) |
-
----
-
-## 🖥️ LiteLLM (проксирование Claude-моделей)
-
-Файл `ClaudeConfigLiteLLM.yaml` позволяет подменять модели Claude через прокси `routerai.ru`.
-
-### Установка
-
-```bat
-pip install "litellm[proxy]"
-```
-
-### Запуск
-
-```bat
 litellm --config ClaudeConfigLiteLLM.yaml --port 4000
 ```
 
-### Подключение в Claude Desktop
-
-Добавьте в `claude_desktop_config.json` блок окружения:
+Замените `YOUR_ROUTERAI_API_KEY` на реальный ключ. Подключение в Claude Desktop:
 
 ```json
 "env": {
@@ -170,45 +108,25 @@ litellm --config ClaudeConfigLiteLLM.yaml --port 4000
 
 ---
 
-## 🧪 Chrome для chrome-devtools (порт 9223)
-
-`chrome-devtools` подключается к Chrome с удалённой отладкой. Запустите Chrome с флагом:
-
-```bat
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9223
-```
-
-Или создайте ярлык Chrome с аргументом `--remote-debugging-port=9223`.
-
----
-
-## ❓ FAQ / Решение проблем
+## ❓ FAQ
 
 | Проблема | Решение |
 |---|---|
-| MCP не появился в списке | Проверьте `claude_desktop_config.json` на валидность JSON, перезапустите Claude Desktop |
-| `npx` долго запускает сервер | Первый запуск качает пакет; дальше кэш ускорит |
+| MCP не появился | Проверьте валидность JSON, перезапустите Claude Desktop полностью (трей → Exit) |
+| `npx` долго стартует | Первый запуск качает пакет, дальше кэш |
 | `github` не работает | Проверьте токен и права (`repo`, `read:org`) |
-| `chrome-devtools` не подключается | Запущен ли Chrome с `--remote-debugging-port=9223`? |
-| `google-sheets` ошибка авторизации | Убедитесь, что JSON-ключ лежит по указанному пути и Service Account включён |
-| `fetch` не запускается | `pip install mcp-server-fetch` и проверьте `python -m mcp_server_fetch` |
-| Изменения конфига не применились | Полностью закройте Claude Desktop (трей → Exit) и запустите заново |
+| `lean-ctx` не найден | `cargo install lean-ctx`, добавьте `.cargo\bin` в `PATH` |
+| `orchestrator-mcp` падает | Не сделан `npm install` в его папке |
+| Логи MCP | `%APPDATA%\Claude\logs\mcp-server-*.log` |
 
 ---
 
 ## ⚠️ Безопасность
 
-- **Никогда не коммитьте реальные токены!** В этом репозитории токены заменены на плейсхолдеры.
-- Файл `claude_desktop_config.json` с реальными ключами добавьте в `.gitignore`, если храните его рядом.
-- Пример `.gitignore`:
-
-```gitignore
-claude_desktop_config.json
-*.json.key
-google-sheets-key.json
-.env
-```
+- **В репозитории нет реальных ключей** — только плейсхолдеры `YOUR_*`.
+- Реальный конфиг генерируется локально через `setup-config.ps1` и в git не попадает.
+- Не коммитьте `claude_desktop_config.json` с реальными ключами.
 
 ---
 
-Лицензия: **MIT**. Сделано для личного использования — используйте на свой страх и риск.
+Лицензия: **MIT**.

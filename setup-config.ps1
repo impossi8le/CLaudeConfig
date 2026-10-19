@@ -67,10 +67,6 @@ $config = @{
             command = "npx"
             args = @("-y", "@modelcontextprotocol/server-sequential-thinking")
         }
-        "anthropic-global-skills" = @{
-            command = "npx"
-            args = @("-y", "@modelcontextprotocol/server-filesystem", "C:/Users/$env:USERNAME/.claude/skills")
-        }
         "github" = @{
             command = "C:/Users/$env:USERNAME/AppData/Local/github/github-mcp-server.exe"
             args = @("stdio")
@@ -78,21 +74,15 @@ $config = @{
                 GITHUB_PERSONAL_ACCESS_TOKEN = $ghToken
             }
         }
-        "fetch" = @{
-            command = "python"
-            args = @("-m", "mcp_server_fetch")
-        }
-        "chrome-devtools" = @{
-            command = "npx"
-            args = @("-y", "chrome-devtools-mcp@latest", "--browser-url=http://localhost:9223")
-        }
-        "web-search" = @{
-            command = "node"
-            args = @("C:/Users/$env:USERNAME/web-search/build/index.js")
-        }
         "n8n-local" = @{
-            command = "mcp-remote"
-            args = @("$n8nUrl/mcp-server/http", "--allow-http", "--header", "Authorization: Bearer $n8nToken")
+            command = "node"
+            args = @(
+                "C:/Users/$env:USERNAME/n8n-mcp-fix-proxy.mjs",
+                "$n8nUrl/mcp-server/http",
+                "--allow-http",
+                "--header",
+                "Authorization: Bearer $n8nToken"
+            )
         }
         "curl-client" = @{
             command = "npx"
@@ -122,29 +112,25 @@ $config = @{
                 TAVILY_API_KEY = $tavilyKey
             }
         }
-        "ssh-remote-server" = @{
-            command = "npx"
-            args = @("-y", "ssh-mcp", "--host=$sshHost", "--user=$sshUser", "--password=$sshPassPlain")
-        }
-        "google-sheets" = @{
-            command = "npx"
-            args = @("-y", "mcp-gsheets@latest")
-            env = @{
-                GOOGLE_PROJECT_ID = "YOUR_GOOGLE_PROJECT_ID"
-                GOOGLE_APPLICATION_CREDENTIALS = "C:/Users/$env:USERNAME/google-sheets-key.json"
-            }
-        }
-        "puppeteer" = @{
-            command = "npx"
-            args = @("-y", "@modelcontextprotocol/server-puppeteer")
-        }
-        "gmail-global" = @{
-            command = "npx"
-            args = @("@gongrzhe/server-gmail-autoauth-mcp")
-        }
         "playwright" = @{
             command = "npx"
             args = @("-y", "@playwright/mcp@latest")
+        }
+        "orchestrator-mcp" = @{
+            command = "node"
+            args = @("C:/Users/$env:USERNAME/orchestrator-mcp/index.js")
+            env = @{
+                ROUTERAI_API_KEY = $routerKey
+                ORCH_PRO_MODEL = "deepseek/deepseek-v4.1-flash"
+                ORCH_FLASH_MODEL = "deepseek/deepseek-chat"
+            }
+        }
+        "context7" = @{
+            command = "npx"
+            args = @("-y", "@upstash/context7-mcp")
+        }
+        "lean-ctx" = @{
+            command = "lean-ctx"
         }
     }
     deploymentMode = "3p"

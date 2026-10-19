@@ -61,16 +61,16 @@ echo [3/7] Установка npm-пакетов (может занять нес
 call :npm_install "@modelcontextprotocol/server-memory"
 call :npm_install "@modelcontextprotocol/server-filesystem"
 call :npm_install "@modelcontextprotocol/server-sequential-thinking"
-call :npm_install "@modelcontextprotocol/server-puppeteer"
-call :npm_install "chrome-devtools-mcp@latest"
 call :npm_install "@calibress/curl-mcp"
 call :npm_install "@alolite/ssh-mcp"
 call :npm_install "tavily-mcp@latest"
-call :npm_install "ssh-mcp"
-call :npm_install "mcp-gsheets@latest"
-call :npm_install "@gongrzhe/server-gmail-autoauth-mcp"
 call :npm_install "@playwright/mcp@latest"
+call :npm_install "@upstash/context7-mcp"
 call :npm_install "mcp-remote"
+echo.
+echo     [!] Не устанавливаются автоматически (см. INSTALL-NEW-PC.md):
+echo         lean-ctx          - Rust-бинарь, ставится через cargo
+echo         github-mcp-server - скачивается с GitHub Releases
 echo.
 
 :: ------------------------------------------------------------
@@ -93,15 +93,15 @@ echo     OK: папки созданы, memory-proxy.cjs скопирован
 echo.
 
 :: ------------------------------------------------------------
-:: 6. Локальный web-search сервер
+:: 6. n8n proxy
 :: ------------------------------------------------------------
-echo [6/7] Настройка локального web-search сервера...
-if not exist "%USERPROFILE%\web-search" mkdir "%USERPROFILE%\web-search"
-if exist "%~dp0web-search\index.js" copy /Y "%~dp0web-search\index.js" "%USERPROFILE%\web-search\index.js" >nul
-if exist "%~dp0web-search\package.json" copy /Y "%~dp0web-search\package.json" "%USERPROFILE%\web-search\package.json" >nul
-pushd "%USERPROFILE%\web-search"
-call npm install
-popd
+echo [6/7] Копирование n8n-прокси...
+if exist "%~dp0n8n-mcp-fix-proxy.mjs" copy /Y "%~dp0n8n-mcp-fix-proxy.mjs" "%USERPROFILE%\n8n-mcp-fix-proxy.mjs" >nul
+echo     OK: n8n-mcp-fix-proxy.mjs скопирован
+echo.
+
+echo     [!] Папка skills НЕ копируется автоматически.
+echo         Если нужно - скопируйте содержимое .\skills в %USERPROFILE%\.claude\skills
 echo.
 
 :: ------------------------------------------------------------

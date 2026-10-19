@@ -8,6 +8,8 @@ model_list:
       api_key: YOUR_ROUTERAI_API_KEY
       supports_function_calling: true
       drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
 
   - model_name: claude-3-opus-20240229
     litellm_params:
@@ -16,6 +18,8 @@ model_list:
       api_key: YOUR_ROUTERAI_API_KEY
       supports_function_calling: true
       drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
 
   - model_name: claude-3-5-haiku-20241022
     litellm_params:
@@ -24,13 +28,73 @@ model_list:
       api_key: YOUR_ROUTERAI_API_KEY
       supports_function_calling: true
       drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
+
+  - model_name: 5.6 Luna
+    litellm_params:
+      model: openai/deepseek/deepseek-v4.1-flash
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
+
+  - model_name: claude-3-5-haiku-20251011
+    litellm_params:
+      model: openai/deepseek/deepseek-v4.1-flash
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
+
+  - model_name: claude-3-5-haiku-202609122
+    litellm_params:
+      model: openai/openai/gpt-6-luna-pro
+      api_base: https://routerai.ru/api/v1
+      api_key: YOUR_ROUTERAI_API_KEY
+      supports_function_calling: true
+      drop_params: true
+      disable_provider_token_counting: true  # <--- Добавьте эту строку
+      guardrails: ["headroom-compression"]
+
+  # - model_name: claude-3-5-haiku-20211011
+  #   litellm_params:
+  #     model: openai/openai/bonsai-2-27b
+  #     api_base: http://127.0.0.1:8085
+  #     api_key: "not-needed"
+  #     supports_function_calling: true
+  #     drop_params: true
+  #     guardrails: ["headroom-compression"]
 
 litellm_settings:
   drop_params: true
+
+  ignore_unknown_params: true # <- Принудительно отсекать всё лишнее
+
   pessimistic_cooldown: false
   cooldown_time: 5
-  success_callbacks: ["anthropic_tpm_rpm_headers"]
-  failure_callbacks: ["anthropic_tpm_rpm_headers"]
+  # Было:
+  # success_callbacks: ["anthropic_tpm_rpm_headers"]
+  # failure_callbacks: ["anthropic_tpm_rpm_headers"]
+
+  # Стало:
+  success_callbacks: []
+  failure_callbacks: []
+
+
 
 general_settings:
   disable_ui: true
+
+guardrails:
+  - guardrail_name: headroom-compression
+    litellm_params:
+      guardrail: headroom
+      mode: pre_call
+      api_base: http://127.0.0.1:8787
+      extra_body:
+        verify: false           # <--- отключить SSL для localhost
